@@ -1,74 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="index.css" rel="stylesheet" />
+<title>Simple Forum</title>
 
-    <link
-    rel="stylesheet"
-    href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-    crossorigin="anonymous"
-  />
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"
-  />
 
-  <script
-    src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-    crossorigin="anonymous"
-  ></script>
-  <script
-    src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-    crossorigin="anonymous"
-  ></script>
-  <script
-    src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-    crossorigin="anonymous"
-  ></script>
 
-  <link
-    href="https://fonts.googleapis.com/icon?family=Material+Icons"
-    rel="stylesheet"
-  />
-  <link href="index.css" rel="stylesheet" />
-  
-    <title>Forum Page</title> 
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #212032;
+    }
+    p {
+        color: black;
+    }
+    .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+    .post {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+    }
+    .post textarea {
+        width: calc(100% - 20px);
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        resize: vertical;
+    }
+    .post button {
+        padding: 8px 15px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .post button:hover {
+        background-color: #0056b3;
+    }
+    .comment {
+        margin-left: 20px;
+        border-left: 1px solid #ccc;
+        padding-left: 10px;
+        margin-top: 10px;
+    }
+</style>
 </head>
-<body> 
-    <div class="toolbar">  
-        <a href="#video" id="meetingJoinButton" class="tool btn-primary">Video</a>
-        <a href="forum.html" class="tool btn-primary" >Forum</a>  
-    
-       </div>
-</form>
-</div> 
+<body>
 
-<h1 class="text-white">Please add your comment</h1>
-<div id="comment-container">
-    <!-- Existing comments will go here -->
+    <div class="toolbar">  
+        <a href="index.html" id="meetingJoinButton" class="tool btn-primary">VideoChat</a>
+        <a href="art forum.html" class="tool btn-primary" >Forum</a> 
+        </div> 
+
+<div class="container">
+    <h1>Simple Forum</h1>
+
+    <div id="posts">
+        <!-- Posts will be dynamically added here -->
+    </div>
+
+    <div class="post">
+        <textarea id="postContent" rows="4" cols="50" placeholder="Write your post"></textarea>
+        <br>
+        <button onclick="CreatePost()">Post</button>
+    </div>
 </div>
-<textarea class="text-black" name="comment" id="new-comment" cols="60" rows="5"></textarea>
-<br>
-<button class="btn btn-primary" id="btn-post">Post</button>
+
 <script>
-// Step 1: Add an event listener to the "Post" button
-document.getElementById("btn-post").addEventListener("click", function () { 
-    const newComment = document.getElementById("new-comment").value; 
-    const commentContainer = document.getElementById("comment-container");
-    const commentElement = document.createElement("p");
-    commentElement.innerText = newComment; 
-    commentContainer.appendChild(commentElement); 
-    document.getElementById("new-comment").value = "comment";
-});
+    // Define a list of disallowed words
+    const disallowedWords = ['shit', 'fuck', 'ass', 'shutup'];
+
+    // Load posts from localStorage or initialize empty array
+    let posts = JSON.parse(localStorage.getItem('posts')) || [];
+
+    // Render posts on page load
+    showposts();
+
+    function CreatePost() {
+        const postContent = document.getElementById('postContent').value; 
+        const containsDisallowedWord = disallowedWords.some(word => postContent.toLowerCase().includes(word));
+        if (postContent.trim() !== '' && !containsDisallowedWord) {
+            const post = {
+                content: postContent,
+                comments: []
+            };
+            posts.push(post);
+            savePosts();
+            showposts();
+            document.getElementById('postContent').value = '';
+        } else {
+            alert('Your post contains disallowed words. Please remove them and try again.');
+        }
+    }
+
+    function CreateComment(postIndex) {
+        const commentContent = prompt('Enter your comment:');
+        if (commentContent.trim() !== '') {
+            posts[postIndex].comments.push(commentContent);
+            savePosts();
+            showposts();
+        }
+    }
+
+    function showposts() {
+        const postsContainer = document.getElementById('posts');
+        postsContainer.innerHTML = '';
+        posts.forEach((post, index) => {
+            const postElement = document.createElement('div');
+            postElement.classList.add('post');
+            postElement.innerHTML = `
+                <p>${post.content}</p>
+                <button onclick="CreateComment(${index})">Add Comment</button>
+            `;
+            if (post.comments && post.comments.length > 0) { // Check if post.comments is defined
+                post.comments.forEach(comment => {
+                    const commentElement = document.createElement('div');
+                    commentElement.classList.add('comment');
+                    commentElement.textContent = comment;
+                    postElement.appendChild(commentElement);
+                });
+            }
+            postsContainer.appendChild(postElement);
+        });
+    }
+
+    function savePosts() {
+        localStorage.setItem('posts', JSON.stringify(posts));
+    }
 </script>
 
-
-</body> 
-
-<script src="forum.js"></script>
+</body>
 </html>
